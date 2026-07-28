@@ -25,7 +25,13 @@ app.disable('x-powered-by');
 app.use(express.static(join(root, 'public')));
 
 app.get('/api/health', (_req, res) => {
-  res.json({ ok: true, service: 'texno', version: '1.0.0' });
+  res.json({
+    ok: true,
+    service: 'texno',
+    version: '1.0.0',
+    host: HOST,
+    port: PORT,
+  });
 });
 
 app.post('/api/analyze', (req, res) => {

@@ -124,6 +124,8 @@ Si el puerto 3847 está ocupado:
 pm2 list
 sudo ss -tlnp | grep :3847
 npm run pm2:restart
+# si PM2 sigue con el puerto viejo en caché:
+npm run pm2:reset
 ```
 
 ---
@@ -223,6 +225,7 @@ TEXNO es un **proyecto colaborativo**. Forks, issues y PRs son bienvenidos.
 | `npm run analyze -- <file>` | CLI de análisis |
 | `npm run screenshots` | Regenera capturas del README |
 | `npm run pm2:start` | Inicia o reinicia con PM2 (sin duplicar proceso) |
+| `npm run pm2:reset` | Borra y recrea texno en PM2 (arregla puerto cacheado) |
 | `npm run vps:update` | `git pull` + install + reinicio PM2 |
 
 ---

@@ -11,9 +11,10 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "analyze": "node src/cli.js",
-    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:start": "node scripts/pm2-start.mjs",
     "pm2:stop": "pm2 stop texno",
-    "pm2:restart": "pm2 restart texno",
+    "pm2:restart": "node scripts/pm2-start.mjs",
+    "vps:update": "git pull && npm install && node scripts/pm2-start.mjs",
     "pm2:logs": "pm2 logs texno",
     "screenshots": "node scripts/capture-screenshots.mjs",
     "paper": "node scripts/generate-paper-pdf.mjs"

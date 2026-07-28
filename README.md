@@ -104,11 +104,26 @@ Abre **http://localhost:3000** → sube un audio → el laboratorio se abre en p
 
 ### Producción
 
+En servidor (VPS), usa **solo PM2** — no mezcles `node src/server.js` con PM2 o verás `EADDRINUSE` en el puerto 3000.
+
 ```bash
-npm start
-# o
 npm install -g pm2
-npm run pm2:start
+npm run pm2:start    # idempotente: inicia o reinicia texno
+npm run pm2:logs
+```
+
+Actualizar en el VPS después de un `git pull`:
+
+```bash
+npm run vps:update
+```
+
+Si el puerto 3000 está ocupado:
+
+```bash
+pm2 list
+sudo ss -tlnp | grep :3000
+npm run pm2:restart
 ```
 
 ---
@@ -207,6 +222,8 @@ TEXNO es un **proyecto colaborativo**. Forks, issues y PRs son bienvenidos.
 | `npm start` | Producción |
 | `npm run analyze -- <file>` | CLI de análisis |
 | `npm run screenshots` | Regenera capturas del README |
+| `npm run pm2:start` | Inicia o reinicia con PM2 (sin duplicar proceso) |
+| `npm run vps:update` | `git pull` + install + reinicio PM2 |
 
 ---
 

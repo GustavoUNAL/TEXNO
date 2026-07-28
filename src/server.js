@@ -7,6 +7,7 @@ import { analyzeTrack, toYaml } from './analyzer/index.js';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const PORT = Number(process.env.PORT) || 3000;
+const HOST = process.env.HOST || '0.0.0.0';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -62,6 +63,26 @@ app.post('/api/analyze', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`TEXNO listening on http://localhost:${PORT}`);
+const server = app.listen(PORT, HOST, () => {
+  console.log(`TEXNO listening on http://${HOST}:${PORT}`);
 });
+
+server.on('error', (err) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(
+      `\nPuerto ${PORT} ya en uso (EADDRINUSE).\n` +
+        '  • Con PM2: npm run pm2:restart\n' +
+        '  • No ejecutes "node src/server.js" si PM2 ya corre texno.\n' +
+        `  • Ver qué lo usa: ss -tlnp | grep :${PORT}\n`
+    );
+    process.exit(1);
+  }
+  console.error(err);
+  process.exit(1);
+});
+
+for (const sig of ['SIGINT', 'SIGTERM']) {
+  process.on(sig, () => {
+    server.close(() => process.exit(0));
+  });
+}

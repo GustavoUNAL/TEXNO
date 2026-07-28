@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>TEXNO — Whitepaper técnico v1.1</title>
+    <style>
+      @page { size: A4; margin: 18mm 16mm 20mm 16mm; }
+      * { box-sizing: border-box; }
+      body {
+        font-family: 'Times New Roman', Times, serif;
+        font-size: 11pt;
+        line-height: 1.45;
+        color: #111;
+        max-width: 170mm;
+        margin: 0 auto;
+        padding: 12mm 0;
+      }
+      h1 {
+        font-size: 18pt;
+        font-weight: bold;
+        text-align: center;
+        margin: 0 0 6pt;
+        line-height: 1.2;
+      }
+      .subtitle {
+        text-align: center;
+        font-size: 12pt;
+        margin: 0 0 4pt;
+        font-style: italic;
+      }
+      .meta {
+        text-align: center;
+        font-size: 10pt;
+        color: #444;
+        margin-bottom: 18pt;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 12pt;
+      }
+      h2 {
+        font-size: 12pt;
+        font-weight: bold;
+        margin: 16pt 0 6pt;
+        page-break-after: avoid;
+      }
+      h3 {
+        font-size: 11pt;
+        font-weight: bold;
+        margin: 12pt 0 4pt;
+        page-break-after: avoid;
+      }
+      p { margin: 0 0 8pt; text-align: justify; }
+      .abstract {
+        margin: 0 0 14pt;
+        padding: 10pt 12pt;
+        background: #f6f6f6;
+        border-left: 3px solid #333;
+      }
+      .abstract strong { display: block; margin-bottom: 4pt; font-size: 10pt; letter-spacing: 0.05em; }
+      ul, ol { margin: 0 0 8pt; padding-left: 18pt; }
+      li { margin-bottom: 3pt; }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 9.5pt;
+        margin: 8pt 0 12pt;
+      }
+      th, td {
+        border: 1px solid #bbb;
+        padding: 5pt 6pt;
+        vertical-align: top;
+      }
+      th { background: #eee; font-weight: bold; }
+      code, pre {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 9pt;
+      }
+      pre {
+        background: #f4f4f4;
+        padding: 8pt;
+        overflow-x: auto;
+        border: 1px solid #ddd;
+        margin: 6pt 0 10pt;
+        white-space: pre-wrap;
+      }
+      .eq {
+        text-align: center;
+        margin: 8pt 0;
+        font-style: italic;
+      }
+      .keywords { font-size: 10pt; margin-top: 8pt; }
+      .footnote { font-size: 9pt; color: #555; margin-top: 20pt; border-top: 1px solid #ddd; padding-top: 8pt; }
+      .page-break { page-break-before: always; }
+      @media screen {
+        body { padding: 24px; background: #e8e8e8; }
+        .page { background: #fff; padding: 40px; max-width: 210mm; margin: 0 auto 24px; box-shadow: 0 2px 12px rgba(0,0,0,.12); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <h1>TEXNO: extracción heurística del ADN estructural de composiciones musicales</h1>
+      <p class="subtitle">Pipeline DSP para análisis de forma, tempo, espectro, armonía y dinámica</p>
+      <p class="meta">
+        Motor TEXNO v1.1 · Documentación técnica<br />
+        Gustavo Arteaga · Proyecto open source · Julio 2026<br />
+        https://github.com/GustavoUNAL/TEXNO
+      </p>
+
+      <div class="abstract">
+        <strong>RESUMEN</strong>
+        TEXNO es un sistema de análisis musical que convierte señales de audio en una
+        representación estructurada serializable (JSON/YAML) denominada <em>ADN de la
+        pista</em>. El motor implementa un pipeline de procesamiento digital de señales
+        (DSP) sin aprendizaje automático: decodificación PCM, mezcla mono, envolvente de
+        energía RMS, autocorrelación temporal para tempo, transformada de Fourier de tiempo
+        discreto (DFT/FFT) con ventana de Hann, agregación espectral logarítmica, cromagrama
+        de 12 clases de altura, estimación de tonalidad por correlación con perfiles
+        Krumhansl–Schmuckler, segmentación de forma por energía relativa y heurísticas de
+        capas instrumentales. Este documento describe con detalle los algoritmos, parámetros,
+        limitaciones y el esquema de salida. El sistema está orientado a música electrónica
+        y dance, donde la repetición rítmica y el espectro comprimido facilitan estimaciones
+        robustas, aunque el marco es aplicable a otros géneros con las reservas indicadas.
+        <p class="keywords"><strong>Palabras clave:</strong> MIR, análisis musical, FFT,
+        cromagrama, estimación de tonalidad, BPM, segmentación de forma, techno.</p>
+      </div>
+
+      <h2>1. Introducción</h2>
+      <p>
+        El análisis musicológico y la ingeniería de audio tradicionalmente requieren
+        herramientas especializadas (DAW, espectroanalizadores, detectores de tempo).
+        TEXNO unifica en un único flujo automático la extracción de descriptores de bajo
+        y medio nivel que caracterizan una grabación masterizada: tempo, distribución
+        espectral, centroide, dinámica, estructura macro (intro, build, drop, break, outro),
+        pitch classes dominantes y capas estimadas (kick, bajo, percusión, hats, aire).
+      </p>
+      <p>
+        La salida no pretende reemplazar la escucha crítica ni la separación de fuentes por
+        modelos neuronales; constituye una <em>firma estructural</em> reproducible, útil para
+        catalogación, comparación de mixes, documentación de sets y prototipado de herramientas
+        de remix o recomendación.
+      </p>
+
+      <h2>2. Arquitectura del sistema</h2>
+      <p>El pipeline se organiza en cinco etapas secuenciales:</p>
+      <ol>
+        <li><strong>Ingesta y metadatos</strong> — decodificación con <code>@audio/decode</code>, lectura ID3/container con <code>music-metadata</code>.</li>
+        <li><strong>Preprocesamiento</strong> — mezcla a mono, normalización implícita por RMS frame.</li>
+        <li><strong>Análisis temporal</strong> — envolvente, BPM, onsets, curva de energía.</li>
+        <li><strong>Análisis espectral y armónico</strong> — FFT, bandas, curva log-frecuencia, cromagrama, tonalidad.</li>
+        <li><strong>Inferencia estructural</strong> — forma, capas, narrativa, serialización ADN.</li>
+      </ol>
+      <pre>
+Audio → decode → mono[n] → envelope[] → {BPM, onsets, form, energy_curve}
+                      ↘ FFT blocks → {spectrum, chroma, harmony, layers}
+      </pre>
+
+      <h2>3. Representación de la señal</h2>
+      <h3>3.1 Decodificación y mezcla mono</h3>
+      <p>
+        Sea <em>x<sub>c</sub>[n]</em> la señal discreta del canal <em>c</em> a frecuencia de
+        muestreo <em>f<sub>s</sub></em>. La mezcla mono se define como:
+      </p>
+      <p class="eq">y[n] = (1/C) · Σ<sub>c=1</sub><sup>C</sup> x<sub>c</sub>[n]</p>
+      <p>
+        donde <em>C</em> es el número de canales. Esta reducción elimina información de
+        panorámica pero estabiliza estimadores espectrales y de energía en material
+        estéreo ampliamente correlacionado (típico en masters de club).
+      </p>
+
+      <h3>3.2 Envolvente de energía (RMS por tramas)</h3>
+      <p>
+        La señal se divide en tramas de <em>N<sub>f</sub> = ⌊f<sub>s</sub> · T<sub>f</sub>⌋</em>
+        muestras con <em>T<sub>f</sub> = 50 ms</em> y salto igual al tamaño de trama (sin
+        solapamiento). Para cada trama <em>k</em>:
+      </p>
+      <p class="eq">E[k] = √( (1/N<sub>f</sub>) · Σ<sub>i=0</sub><sup>N<sub>f</sub>−1</sup> y[n<sub>k</sub>+i]² )</p>
+      <p>
+        La secuencia <em>{E[k]}</em> constituye la envolvente de amplitud y es la base para
+        tempo, onsets, segmentación de forma y curva de energía narrativa.
+      </p>
+
+      <h2>4. Análisis temporal y rítmico</h2>
+      <h3>4.1 Estimación de tempo (BPM)</h3>
+      <p>
+        Se aplica autocorrelación no normalizada sobre la envolvente centrada en media:
+        <em>Ẽ[k] = E[k] − μ<sub>E</sub></em>. Para cada retardo <em>τ</em> en el rango
+        compatible con 70–180 BPM:
+      </p>
+      <p class="eq">R(τ) = Σ<sub>k</sub> Ẽ[k] · Ẽ[k+τ]</p>
+      <p>
+        El retardo <em>τ*</em> que maximiza <em>R(τ)</em> se convierte en tempo
+        <em>BPM = 60 · f<sub>env</sub> / τ*</em>, donde <em>f<sub>env</sub> = 1000/T<sub>f</sub></em>
+        es la tasa de frames de la envolvente. Se aplican reglas de octava para favorecer el
+        rango electrónico (duplicar si BPM &lt; 100, dividir si BPM &gt; 160). La confianza
+        se escala linealmente con <em>R(τ*)</em> respecto a la longitud de la envolvente.
+      </p>
+
+      <h3>4.2 Detección de onsets</h3>
+      <p>
+        Picos locales en <em>E[k]</em> por encima de <em>θ = 1.4 · μ<sub>E</sub></em>, con
+        separación mínima de 80 ms entre eventos. La densidad rítmica se reporta como
+        <em>onsets / duración</em> (eventos por segundo).
+      </p>
+
+      <h2>5. Análisis espectral</h2>
+      <h3>5.1 Bloques FFT</h3>
+      <p>
+        La señal se analiza en bloques de <em>N = 2048</em> muestras con ventana de Hann:
+      </p>
+      <p class="eq">w[n] = 0.5 · (1 − cos(2πn / (N−1)))</p>
+      <p>
+        El avance entre bloques es <em>hop = 4N</em> muestras (~186 ms a 44.1 kHz), reduciendo
+        coste computacional. Se implementa FFT radix-2 in-place (Cooley–Tukey) sobre las
+        componentes real e imaginaria.
+      </p>
+      <p>
+        Para cada bin <em>k</em>, la magnitud es <em>|X[k]| = √(Re² + Im²)</em> y la
+        frecuencia asociada <em>f<sub>k</sub> = k · f<sub>s</sub> / N</em>.
+      </p>
+
+      <h3>5.2 Bandas de frecuencia</h3>
+      <p>La energía espectral se agrega en cinco bandas estándar de mezcla:</p>
+      <table>
+        <tr><th>Banda</th><th>Rango (Hz)</th><th>Interpretación</th></tr>
+        <tr><td>SUB</td><td>20–60</td><td>Sub-graves, kick fundamental</td></tr>
+        <tr><td>LOW</td><td>60–250</td><td>Bajo, cuerpo</td></tr>
+        <tr><td>MID</td><td>250–2000</td><td>Percusión, snare, cuerpo de sintes</td></tr>
+        <tr><td>HIGH</td><td>2000–8000</td><td>Presencia, hi-hats</td></tr>
+        <tr><td>AIR</td><td>8000–20000</td><td>Brillo, ruido, FX</td></tr>
+      </table>
+      <p>
+        Cada banda se normaliza dividiendo por la suma total de magnitudes en el rango
+        audible (20 Hz–20 kHz), obteniendo proporciones en [0,1].
+      </p>
+
+      <h3>5.3 Curva espectral logarítmica</h3>
+      <p>
+        Para visualización de espectro completo se definen <em>B = 96</em> bins logarítmicos
+        entre 20 Hz y 20 kHz. Los bordes de bin siguen:
+      </p>
+      <p class="eq">f<sub>i</sub> = f<sub>min</sub> · (f<sub>max</sub>/f<sub>min</sub>)<sup>i/B</sup></p>
+      <p>
+        La magnitud por bin se acumula y normaliza por el máximo global, reportándose también
+        en dB relativos: <em>20 log<sub>10</sub>(mag)</em>.
+      </p>
+
+      <h3>5.4 Centroide espectral</h3>
+      <p class="eq">SC = Σ<sub>k</sub> f<sub>k</sub> · |X[k]| / Σ<sub>k</sub> |X[k]|</p>
+      <p>
+        Valores altos del centroide (&gt; 4 kHz) se clasifican como brillo <em>high</em>;
+        entre 2–4 kHz <em>medium</em>; por debajo <em>low</em>.
+      </p>
+
+      <h2>6. Análisis armónico</h2>
+      <h3>6.1 Cromagrama</h3>
+      <p>
+        Para frecuencias entre 55 Hz y 5 kHz, cada bin espectral se proyecta a una clase de
+        altura (pitch class) de 12 semitonos mediante:
+      </p>
+      <p class="eq">MIDI(f) = 69 + 12 · log<sub>2</sub>(f / 440)</p>
+      <p>
+        La contribución al cromagrama se pondera por magnitud, con factor 1.35 para
+        f &lt; 400 Hz (énfasis en fundamentales) y 0.7 para f &gt; 2 kHz (atenuación de
+        parciales agudos). El vector de 12 dimensiones se normaliza a suma unitaria.
+      </p>
+
+      <h3>6.2 Estimación de tonalidad (Krumhansl–Schmuckler)</h3>
+      <p>
+        Se correlaciona el cromagrama con perfiles de sensación de tonalidad para modo mayor
+        y menor (Krumhansl &amp; Kessler, 1982; implementación con correlación de Pearson
+        circular para las 12 transposiciones). La clave y modo con mayor correlación definen
+        la tonalidad estimada. La confianza se mapea desde la correlación máxima:
+      </p>
+      <p class="eq">conf = clamp((r<sub>max</sub> − 0.55) / 0.4, 0, 1)</p>
+      <p>
+        En material electrónico monotonal o altamente percusivo, la confianza armónica puede
+        ser alta estadísticamente pero musicalmente ambigua; debe interpretarse junto al
+        espectro y al género.
+      </p>
+
+      <h3>6.3 Picos espectrales y notas</h3>
+      <p>
+        Por bloque FFT se registra el pico de mayor magnitud entre 40 Hz y 2 kHz. Los picos
+        globales más fuertes se mapean a notas (nombre + octava) evitando duplicar pitch
+        classes, hasta 8 candidatos, con fuerza relativa normalizada.
+      </p>
+
+      <div class="page-break"></div>
+
+      <h2>7. Dinámica</h2>
+      <p>Sobre la señal mono completa:</p>
+      <ul>
+        <li><strong>Peak</strong> — máximo |y[n]| en escala lineal y dBFS: 20 log<sub>10</sub>(peak).</li>
+        <li><strong>RMS</strong> — √(Σ y[n]² / N).</li>
+        <li><strong>Rango dinámico</strong> — peak<sub>dB</sub> − RMS<sub>dB</sub>.</li>
+        <li><strong>LUFS aproximado</strong> — RMS<sub>dB</sub> − 0.691 (heurística, no EBU R128).</li>
+      </ul>
+      <p>
+        La <em>roughness</em> timbral se categoriza por rango dinámico: &lt; 6 dB
+        <em>compressed</em>, 6–12 dB <em>moderate</em>, &gt; 12 dB <em>open</em>.
+      </p>
+
+      <h2>8. Segmentación de forma musical</h2>
+      <p>
+        La envolvente se agrupa en ventanas de ≈1/16 de la duración total. Cada ventana
+        recibe energía normalizada <em>ê = e / max(e)</em> y una etiqueta heurística:
+      </p>
+      <table>
+        <tr><th>Condición</th><th>Etiqueta</th></tr>
+        <tr><td>t &lt; 12% duración y ê &lt; 0.45</td><td>intro</td></tr>
+        <tr><td>t &gt; 85% duración</td><td>outro</td></tr>
+        <tr><td>ê &lt; 0.35</td><td>break</td></tr>
+        <tr><td>ê &lt; 0.55</td><td>build</td></tr>
+        <tr><td>en otro caso</td><td>drop</td></tr>
+      </table>
+      <p>
+        Secciones contiguas con la misma etiqueta se fusionan. El número de compases se
+        estima dividiendo la duración de la sección por <em>4 · 60/BPM</em> (compás 4/4
+        asumido). La energía por sección se reporta en escala 1–10.
+      </p>
+
+      <h2>9. Estimación de capas (heurística)</h2>
+      <p>
+        A partir de las proporciones espectrales y el BPM, se infiere presencia de capas
+        instrumentales sin separación de fuentes:
+      </p>
+      <ul>
+        <li>SUB &gt; 8% → kick</li>
+        <li>LOW &gt; 10% → bass</li>
+        <li>MID &gt; 15% → percussion</li>
+        <li>HIGH &gt; 12% → hats</li>
+        <li>AIR &gt; 8% → air_fx</li>
+        <li>BPM 130–160 → synth_texture (contexto techno)</li>
+      </ul>
+      <p>
+        La presencia se clasifica como <em>high</em>, <em>medium</em> o <em>low</em> según
+        umbrales relativos dentro de cada banda.
+      </p>
+
+      <h2>10. Esquema de salida (ADN)</h2>
+      <p>El objeto JSON/YAML <em>Track DNA</em> contiene los siguientes módulos:</p>
+      <table>
+        <tr><th>Módulo</th><th>Campos principales</th></tr>
+        <tr><td>track</td><td>title, bpm, duration_s, key, sample_rate, codec</td></tr>
+        <tr><td>form</td><td>array de {name, start_s, end_s, bars, energy}</td></tr>
+        <tr><td>mix</td><td>bands, spectrum_curve[], spectral_centroid_hz, rms_db, peak_db</td></tr>
+        <tr><td>harmony</td><td>key, scale, chromagram[12], peaks[], explanation_lines[]</td></tr>
+        <tr><td>rhythm</td><td>onset_times_s[], density_events_per_s, bpm_confidence</td></tr>
+        <tr><td>timbre</td><td>brightness, roughness</td></tr>
+        <tr><td>narrative</td><td>energy_curve[], atmosphere, dominant_element</td></tr>
+        <tr><td>layers</td><td>id, role, freq_hint, presence, notes</td></tr>
+        <tr><td>analysis_meta</td><td>engine, version, analyzed_at, confidence</td></tr>
+      </table>
+
+      <h2>11. Complejidad y parámetros</h2>
+      <table>
+        <tr><th>Parámetro</th><th>Valor</th></tr>
+        <tr><td>Tamaño FFT N</td><td>2048</td></tr>
+        <tr><td>Hop espectral</td><td>4N muestras</td></tr>
+        <tr><td>Trama RMS</td><td>50 ms</td></tr>
+        <tr><td>Bins curva log</td><td>96</td></tr>
+        <tr><td>Rango BPM</td><td>70–180 (con snapping de octava)</td></tr>
+        <tr><td>Umbral onset</td><td>1.4 × media de envolvente</td></tr>
+      </table>
+      <p>
+        Para una pista de duración <em>D</em> segundos a 44.1 kHz, el número de bloques FFT
+        es O(D · f<sub>s</sub> / (4N)) ≈ O(5.4 · D) bloques por minuto de audio. La FFT
+        domina el coste por bloque con O(N log N).
+      </p>
+
+      <h2>12. Limitaciones y trabajo futuro</h2>
+      <ul>
+        <li>No hay separación de fuentes (stems); las capas son inferencias espectrales.</li>
+        <li>La tonalidad falla en audio atonal, ruido puro o mezclas muy comprimidas.</li>
+        <li>El tempo por autocorrelación de envolvente confunde mitades/dobles del pulso real.</li>
+        <li>La forma musical es heurística; no detecta letras ni cambios armónicos finos.</li>
+        <li>LUFS reportado no cumple norma ITU-R BS.1770.</li>
+      </ul>
+      <p>
+        Extensiones previstas: modelos de separación (Demucs, Spleeter), detección de acordes
+        por HMM/CNN, segmentación con auto-similitud (checkerboard kernel), y calibración
+        perceptual EBU R128.
+      </p>
+
+      <h2>13. Referencias</h2>
+      <ol>
+        <li>Krumhansl, C. L., &amp; Kessler, E. J. (1982). Tracing the dynamic changes in perceived tonal organization in a spatial representation of musical keys. <em>Psychological Review</em>, 89(4), 334–368.</li>
+        <li>Cooley, J. W., &amp; Tukey, J. W. (1965). An algorithm for the machine calculation of complex Fourier series. <em>Mathematics of Computation</em>, 19(90), 297–301.</li>
+        <li>Bello, J. P., et al. (2005). A tutorial on onset detection in music signals. <em>IEEE Transactions on Speech and Audio Processing</em>, 13(5), 1035–1047.</li>
+        <li>Müller, M. (2015). <em>Fundamentals of Music Processing</em>. Springer.</li>
+        <li>ITU-R BS.1770 — Algorithms to measure audio programme loudness.</li>
+      </ol>
+
+      <p class="footnote">
+        Documento generado para el proyecto TEXNO v1.1. Código fuente y actualizaciones:
+        https://github.com/GustavoUNAL/TEXNO · MIT License.
+      </p>
+    </div>
+  </body>
+</html>

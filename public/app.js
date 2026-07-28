@@ -16,6 +16,9 @@ const resetBtn = document.getElementById('reset-btn');
 const copyBtn = document.getElementById('copy-btn');
 const downloadBtn = document.getElementById('download-btn');
 const closeModalBtn = document.getElementById('close-modal');
+const docsModal = document.getElementById('docs-modal');
+const closeDocsBtn = document.getElementById('close-docs');
+const openDocsLink = document.getElementById('open-docs');
 const dropzone = form;
 const dropTitle = document.getElementById('drop-title');
 const dropMeta = document.getElementById('drop-meta');
@@ -233,10 +236,15 @@ async function purgePlots() {
   }
 }
 
+function syncModalBodyLock() {
+  const anyOpen = !modal.hidden || (docsModal && !docsModal.hidden);
+  document.body.classList.toggle('modal-open', anyOpen);
+}
+
 function openModal({ loading = false } = {}) {
   modal.hidden = false;
   modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
+  syncModalBodyLock();
   labBusy.hidden = !loading;
   if (loading) busyText.textContent = 'Analizando…';
 }
@@ -244,8 +252,28 @@ function openModal({ loading = false } = {}) {
 function closeModal() {
   modal.hidden = true;
   modal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
+  syncModalBodyLock();
   labBusy.hidden = true;
+}
+
+function openDocsModal() {
+  if (!docsModal) return;
+  docsModal.hidden = false;
+  docsModal.setAttribute('aria-hidden', 'false');
+  syncModalBodyLock();
+  if (location.hash !== '#documentacion') {
+    history.replaceState(null, '', '#documentacion');
+  }
+}
+
+function closeDocsModal() {
+  if (!docsModal) return;
+  docsModal.hidden = true;
+  docsModal.setAttribute('aria-hidden', 'true');
+  syncModalBodyLock();
+  if (location.hash === '#documentacion') {
+    history.replaceState(null, '', `${location.pathname}${location.search}`);
+  }
 }
 
 function clearLabDom() {
@@ -803,8 +831,30 @@ modal.querySelectorAll('[data-close-modal]').forEach((el) => {
   el.addEventListener('click', () => closeModal());
 });
 
+if (docsModal) {
+  closeDocsBtn?.addEventListener('click', () => closeDocsModal());
+  docsModal.querySelectorAll('[data-close-docs]').forEach((el) => {
+    el.addEventListener('click', () => closeDocsModal());
+  });
+  openDocsLink?.addEventListener('click', (e) => {
+    e.preventDefault();
+    openDocsModal();
+  });
+}
+
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && !modal.hidden) closeModal();
+  if (e.key !== 'Escape') return;
+  if (!docsModal?.hidden) closeDocsModal();
+  else if (!modal.hidden) closeModal();
+});
+
+if (location.hash === '#documentacion') {
+  openDocsModal();
+}
+
+window.addEventListener('hashchange', () => {
+  if (location.hash === '#documentacion') openDocsModal();
+  else if (!docsModal?.hidden) closeDocsModal();
 });
 
 dropzone.addEventListener('dragover', (e) => {

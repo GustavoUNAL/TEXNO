@@ -25,6 +25,7 @@
       <nav>
         <a href="#analizar">Analizar</a>
         <a href="#adn">ADN</a>
+        <a href="#documentacion" id="open-docs">Documentación</a>
         <a href="/opensource.html">Open Source</a>
       </nav>
     </header>
@@ -225,6 +226,54 @@
             <span class="busy-pulse"></span>
             <p id="busy-text">Analizando…</p>
           </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DOCUMENTACIÓN -->
+    <div id="docs-modal" class="modal" hidden aria-hidden="true">
+      <div class="modal-backdrop" data-close-docs></div>
+      <div
+        class="modal-panel docs-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="docs-title"
+      >
+        <header class="modal-top">
+          <div class="modal-heading">
+            <p class="modal-kicker">TEXNO</p>
+            <h2 id="docs-title">Documentación</h2>
+            <p class="result-sub">
+              Whitepaper científico: procesamiento de señal, armonía, forma y ADN musical.
+            </p>
+          </div>
+          <div class="modal-actions">
+            <a
+              class="btn ghost light"
+              href="/docs/texno-whitepaper.pdf"
+              download="texno-whitepaper.pdf"
+            >
+              Descargar PDF
+            </a>
+            <a
+              class="btn ghost light"
+              href="/docs/texno-whitepaper.html"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Versión HTML
+            </a>
+            <button type="button" class="btn primary" id="close-docs" aria-label="Cerrar">
+              Cerrar
+            </button>
+          </div>
+        </header>
+        <div class="docs-viewer">
+          <iframe
+            id="docs-frame"
+            src="/docs/texno-whitepaper.pdf"
+            title="TEXNO — Documentación científica (PDF)"
+          ></iframe>
         </div>
       </div>
     </div>

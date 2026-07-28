@@ -15,7 +15,8 @@
     "pm2:stop": "pm2 stop texno",
     "pm2:restart": "pm2 restart texno",
     "pm2:logs": "pm2 logs texno",
-    "screenshots": "node scripts/capture-screenshots.mjs"
+    "screenshots": "node scripts/capture-screenshots.mjs",
+    "paper": "node scripts/generate-paper-pdf.mjs"
   },
   "engines": {
     "node": ">=18"

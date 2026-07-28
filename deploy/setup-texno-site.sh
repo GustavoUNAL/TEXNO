@@ -30,22 +30,25 @@ apt-get update -qq
 apt-get install -y nginx certbot python3-certbot-nginx curl
 
 echo "==> Comprobando DNS de ${DOMAIN}..."
-RESOLVED_IPS="$(dns_public_ips "$DOMAIN" | tr '\n' ' ')"
-WWW_IPS="$(dns_public_ips "$WWW" | tr '\n' ' ')"
-LOCAL_IPS="$(dns_local_ips "$DOMAIN" | tr '\n' ' ')"
+AUTH_IPS="$(dns_authoritative_ips "$DOMAIN")"
+CACHE_IPS="$(dns_resolver_ips "$DOMAIN")"
 SERVER_IP="$(curl -4 -s ifconfig.me || curl -4 -s icanhazip.com || true)"
-echo "    ${DOMAIN} A (público): ${RESOLVED_IPS:-?}"
-echo "    ${WWW} A (público):     ${WWW_IPS:-?}"
-echo "    ${DOMAIN} A (caché VPS): ${LOCAL_IPS:-?}"
-echo "    VPS IPv4:               ${SERVER_IP:-?}"
+echo "    ${DOMAIN} A (Hostinger): ${AUTH_IPS:-?}"
+echo "    ${DOMAIN} A (caché):     ${CACHE_IPS:-?}"
+echo "    VPS IPv4:                 ${SERVER_IP:-?}"
 
-IP_COUNT="$(dns_public_ips "$DOMAIN" | wc -l | tr -d ' ')"
-if [[ "${IP_COUNT:-0}" -gt 1 ]]; then
+AUTH_COUNT="$(echo "$AUTH_IPS" | grep -c . || true)"
+BAD_AUTH="$(echo "$AUTH_IPS" | grep -v "^${SERVER_IP}$" || true)"
+if [[ "${AUTH_COUNT:-0}" -ne 1 ]] || [[ -n "$BAD_AUTH" ]]; then
   echo ""
-  echo "ERROR: ${DOMAIN} tiene ${IP_COUNT} registros A distintos en DNS público."
-  echo "       Deja SOLO esta IP en Hostinger: ${SERVER_IP}"
-  echo "       IPs actuales: $(dns_public_ips "$DOMAIN" | paste -sd ', ' -)"
+  echo "ERROR: en Hostinger debe haber un solo registro A → ${SERVER_IP}"
+  echo "       Autoritativo actual: $(echo "$AUTH_IPS" | paste -sd ', ' -)"
   exit 1
+fi
+
+STALE="$(echo "$CACHE_IPS" | grep -v "^${SERVER_IP}$" || true)"
+if [[ -n "$STALE" ]]; then
+  echo "    AVISO: caché DNS antigua en resolvers ($(echo "$STALE" | paste -sd ', ' -)); se continúa."
 fi
 
 if [[ -n "$RESOLVED_IPS" && -n "$SERVER_IP" && "$RESOLVED_IPS" != *"$SERVER_IP"* ]]; then

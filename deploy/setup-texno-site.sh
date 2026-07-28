@@ -9,6 +9,8 @@ DOMAIN="texno.site"
 WWW="www.texno.site"
 EMAIL="${CERTBOT_EMAIL:-}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+# shellcheck source=lib/dns-check.sh
+source "${REPO_ROOT}/deploy/lib/dns-check.sh"
 NGINX_AVAILABLE="/etc/nginx/sites-available/${DOMAIN}.conf"
 NGINX_ENABLED="/etc/nginx/sites-enabled/${DOMAIN}.conf"
 CERTBOT_WEBROOT="/var/www/certbot"
@@ -28,20 +30,21 @@ apt-get update -qq
 apt-get install -y nginx certbot python3-certbot-nginx curl
 
 echo "==> Comprobando DNS de ${DOMAIN}..."
-RESOLVED_IPS="$(dig +short "$DOMAIN" A | sort -u | tr '\n' ' ')"
-WWW_IPS="$(dig +short "$WWW" A | sort -u | tr '\n' ' ')"
+RESOLVED_IPS="$(dns_public_ips "$DOMAIN" | tr '\n' ' ')"
+WWW_IPS="$(dns_public_ips "$WWW" | tr '\n' ' ')"
+LOCAL_IPS="$(dns_local_ips "$DOMAIN" | tr '\n' ' ')"
 SERVER_IP="$(curl -4 -s ifconfig.me || curl -4 -s icanhazip.com || true)"
-echo "    ${DOMAIN} A: ${RESOLVED_IPS:-?}"
-echo "    ${WWW} A: ${WWW_IPS:-?}"
-echo "    VPS IPv4: ${SERVER_IP:-?}"
+echo "    ${DOMAIN} A (público): ${RESOLVED_IPS:-?}"
+echo "    ${WWW} A (público):     ${WWW_IPS:-?}"
+echo "    ${DOMAIN} A (caché VPS): ${LOCAL_IPS:-?}"
+echo "    VPS IPv4:               ${SERVER_IP:-?}"
 
-IP_COUNT="$(dig +short "$DOMAIN" A | sort -u | wc -l | tr -d ' ')"
+IP_COUNT="$(dns_public_ips "$DOMAIN" | wc -l | tr -d ' ')"
 if [[ "${IP_COUNT:-0}" -gt 1 ]]; then
   echo ""
-  echo "ERROR: ${DOMAIN} tiene ${IP_COUNT} registros A distintos."
-  echo "       Let's Encrypt valida desde varias redes; si una IP apunta a otro servidor, falla el SSL."
-  echo "       Deja SOLO esta IP en tu DNS: ${SERVER_IP}"
-  echo "       IPs actuales: $(dig +short "$DOMAIN" A | sort -u | paste -sd ', ' -)"
+  echo "ERROR: ${DOMAIN} tiene ${IP_COUNT} registros A distintos en DNS público."
+  echo "       Deja SOLO esta IP en Hostinger: ${SERVER_IP}"
+  echo "       IPs actuales: $(dns_public_ips "$DOMAIN" | paste -sd ', ' -)"
   exit 1
 fi
 

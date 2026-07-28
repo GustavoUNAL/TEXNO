@@ -9,6 +9,8 @@ WWW="www.texno.site"
 EMAIL="${CERTBOT_EMAIL:-}"
 REPO_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 VPS_IP="$(curl -4 -s ifconfig.me || curl -4 -s icanhazip.com || true)"
+# shellcheck source=lib/dns-check.sh
+source "${REPO_ROOT}/deploy/lib/dns-check.sh"
 
 if [[ $EUID -ne 0 ]]; then
   echo "Ejecuta con sudo."
@@ -22,24 +24,28 @@ echo ""
 
 # ── 1. DNS ──────────────────────────────────
 echo "▶ 1/4  DNS"
-IPS="$(dig +short "$DOMAIN" A | sort -u)"
-echo "   Registros A: $(echo "$IPS" | paste -sd ', ' -)"
-echo "   IP del VPS:  ${VPS_IP}"
+LOCAL_IPS="$(dns_local_ips "$DOMAIN" | paste -sd ', ' -)"
+PUBLIC_IPS="$(dns_public_ips "$DOMAIN")"
+echo "   DNS local (caché VPS): ${LOCAL_IPS:-—}"
+echo "   DNS público (real):    $(echo "$PUBLIC_IPS" | paste -sd ', ' -)"
+echo "   IP del VPS:            ${VPS_IP}"
 
-BAD_IPS="$(echo "$IPS" | grep -v "^${VPS_IP}$" || true)"
+BAD_IPS="$(echo "$PUBLIC_IPS" | grep -v "^${VPS_IP}$" || true)"
 if [[ -n "$BAD_IPS" ]]; then
   echo ""
-  echo "   ❌ DNS INCORRECTO — hay IPs que no son tu VPS:"
+  echo "   ❌ DNS INCORRECTO en servidores públicos:"
   echo "$BAD_IPS" | sed 's/^/      • /'
   echo ""
-  echo "   Ve al panel DNS de ${DOMAIN} y ELIMINA esos registros A."
+  echo "   Ve al panel DNS de ${DOMAIN} (Hostinger) y elimina esos registros A."
   echo "   Deja SOLO:  A  @  →  ${VPS_IP}"
   echo "                A  www → ${VPS_IP}"
-  echo ""
-  echo "   Luego espera 10 min y vuelve a ejecutar este script."
   exit 1
 fi
-echo "   ✓ DNS OK (una sola IP)"
+
+if echo "$(dns_local_ips "$DOMAIN")" | grep -qv "^${VPS_IP}$" 2>/dev/null; then
+  echo "   ⚠️  Caché DNS local desactualizada (ignorada; el DNS público ya está bien)."
+fi
+echo "   ✓ DNS público OK"
 echo ""
 
 # ── 2. TEXNO local ──────────────────────────

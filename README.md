@@ -128,6 +128,28 @@ npm run pm2:restart
 npm run pm2:reset
 ```
 
+### HTTPS con Nginx (`texno.site`)
+
+1. En tu DNS, apunta **texno.site** y **www.texno.site** a la IP del VPS (registro **A**).
+2. Asegúrate de que TEXNO corre en PM2 (`npm run pm2:reset`).
+3. En el VPS:
+
+```bash
+cd ~/projects/TEXNO
+git pull
+sudo CERTBOT_EMAIL=tu@email.com bash deploy/setup-texno-site.sh
+```
+
+El script instala Nginx + Certbot, obtiene el certificado Let's Encrypt y publica **https://texno.site** → `127.0.0.1:3847`.
+
+Config manual: [`deploy/nginx/texno.site.conf`](deploy/nginx/texno.site.conf)
+
+Verificar:
+
+```bash
+curl -sI https://texno.site/api/health
+```
+
 ---
 
 ## CLI

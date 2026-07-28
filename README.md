@@ -144,10 +144,16 @@ El script instala Nginx + Certbot, obtiene el certificado Let's Encrypt y public
 
 Config manual: [`deploy/nginx/texno.site.conf`](deploy/nginx/texno.site.conf)
 
-Verificar:
+Si Certbot falla con **500** en el challenge:
+
+1. En Cloudflare (si lo usas): pon el registro en **DNS only** (gris), no proxy (naranja).
+2. Diagnóstico: `sudo bash deploy/diagnose-texno-nginx.sh`
+3. Vuelve a correr el script de setup (ahora prueba el challenge antes de Certbot).
 
 ```bash
-curl -sI https://texno.site/api/health
+cd ~/projects/TEXNO
+git pull
+sudo CERTBOT_EMAIL=tu@email.com bash deploy/setup-texno-site.sh
 ```
 
 ---

@@ -1,0 +1,37 @@
+{
+  "name": "texno",
+  "version": "1.0.0",
+  "description": "Análisis estructural de composiciones musicales — ADN de una canción",
+  "type": "module",
+  "main": "src/server.js",
+  "bin": {
+    "texno": "src/cli.js"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "analyze": "node src/cli.js",
+    "pm2:start": "pm2 start ecosystem.config.cjs",
+    "pm2:stop": "pm2 stop texno",
+    "pm2:restart": "pm2 restart texno",
+    "pm2:logs": "pm2 logs texno"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "keywords": [
+    "music",
+    "analysis",
+    "dsp",
+    "techno",
+    "audio"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "@audio/decode": "^3.11.2",
+    "express": "^4.21.2",
+    "js-yaml": "^4.1.0",
+    "multer": "^2.2.0",
+    "music-metadata": "^10.9.0"
+  }
+}

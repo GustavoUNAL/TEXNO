@@ -1,0 +1,13 @@
+node_modules/
+logs/
+uploads/
+tmp/
+data/
+*.log
+.DS_Store
+.env
+.env.*
+dna.json
+dna.yaml
+*-dna.json
+*-dna.yaml

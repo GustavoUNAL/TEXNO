@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TEXNO — ADN de una canción</title>
+    <meta
+      name="description"
+      content="Analiza una composición musical y obtén espectro completo, tonalidad, notas, forma y dinámica."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" defer></script>
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="logo" href="/">TEXNO</a>
+      <nav>
+        <a href="#analizar">Analizar</a>
+        <a href="#adn">ADN</a>
+      </nav>
+    </header>
+
+    <main>
+      <section class="hero" aria-label="Inicio">
+        <div class="hero-copy">
+          <p class="brand">TEXNO</p>
+          <h1>El ADN de tu track.</h1>
+          <p class="lede">
+            Espectro, tonalidad y forma en un laboratorio visual — Plotly, nivel
+            estudio.
+          </p>
+          <div class="cta-row">
+            <a class="btn primary" href="#analizar">Analizar audio</a>
+            <a class="btn ghost" href="#adn">Ver estructura</a>
+          </div>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="scope">
+            <canvas id="scope" width="800" height="420"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <section id="analizar" class="panel">
+        <h2>Analizar</h2>
+        <p class="section-lede">
+          Sube un audio. El laboratorio se abre en popup con gráficas interactivas.
+        </p>
+
+        <form id="analyze-form" class="dropzone" autocomplete="off">
+          <input
+            id="audio"
+            name="audio"
+            type="file"
+            accept="audio/*,.mp3,.wav,.flac,.ogg,.m4a"
+          />
+          <label for="audio" class="drop-label">
+            <span class="drop-title" id="drop-title">Arrastra o elige un audio</span>
+            <span class="drop-meta" id="drop-meta">MP3, WAV, FLAC, OGG · máx. 80&nbsp;MB</span>
+          </label>
+          <div class="file-chip" id="file-chip" hidden>
+            <span id="file-chip-name"></span>
+            <button type="button" class="chip-clear" id="clear-file" aria-label="Quitar archivo">×</button>
+          </div>
+          <div class="form-actions">
+            <select id="format" name="format" aria-label="Formato de salida">
+              <option value="json">JSON</option>
+              <option value="yaml">YAML</option>
+            </select>
+            <button type="button" class="btn ghost" id="reset-btn">Reiniciar</button>
+            <button type="submit" class="btn primary" id="submit-btn">
+              Extraer ADN
+            </button>
+          </div>
+        </form>
+
+        <p id="status" class="status" hidden></p>
+        <div id="progress" class="progress" hidden>
+          <div class="progress-bar" id="progress-bar"></div>
+        </div>
+      </section>
+
+      <section id="adn" class="panel structure">
+        <h2>Estructura del ADN</h2>
+        <p class="section-lede">
+          Lo que el motor descompone de cada composición.
+        </p>
+        <ol class="dna-list">
+          <li><strong>Forma</strong> — intro, build, drop, break, outro</li>
+          <li><strong>Tempo</strong> — BPM, compás, groove</li>
+          <li><strong>Espectro</strong> — curva 20 Hz–20 kHz + bandas</li>
+          <li><strong>Armonía</strong> — tonalidad, escala, cromagrama, notas</li>
+          <li><strong>Dinámica</strong> — RMS, picos, rango</li>
+          <li><strong>Ritmo</strong> — onsets y densidad</li>
+          <li><strong>Capas</strong> — kick, bass, hats, FX…</li>
+          <li><strong>Narrativa</strong> — curva de energía</li>
+        </ol>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>TEXNO v1.3 · Plotly lab</span>
+      <span><code>npm start</code> · <code>pm2 start</code></span>
+    </footer>
+
+    <!-- LAB POPUP -->
+    <div id="lab-modal" class="modal" hidden aria-hidden="true">
+      <div class="modal-backdrop" data-close-modal></div>
+      <div
+        class="modal-panel"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="result-title"
+      >
+        <header class="modal-top">
+          <div class="modal-heading">
+            <p class="modal-kicker">TEXNO LAB</p>
+            <h2 id="result-title">Resultado</h2>
+            <p class="result-sub" id="result-sub"></p>
+          </div>
+          <div class="modal-actions">
+            <button type="button" class="btn ghost light" id="copy-btn">Copiar</button>
+            <button type="button" class="btn ghost light" id="download-btn">Descargar</button>
+            <button type="button" class="btn primary" id="close-modal" aria-label="Cerrar">
+              Cerrar
+            </button>
+          </div>
+        </header>
+
+        <div class="modal-scroll">
+          <div class="metrics" id="metrics"></div>
+
+          <div class="plot-grid">
+            <div class="plot-card plot-wide">
+              <div class="plot-head">
+                <h3>Espectro</h3>
+                <span id="spectrum-meta">20 Hz → 20 kHz</span>
+              </div>
+              <div id="plot-spectrum" class="plot"></div>
+            </div>
+            <div class="plot-card">
+              <div class="plot-head">
+                <h3>Energía &amp; forma</h3>
+                <span id="energy-meta">timeline</span>
+              </div>
+              <div id="plot-energy" class="plot"></div>
+            </div>
+            <div class="plot-card">
+              <div class="plot-head">
+                <h3>Cromagrama</h3>
+                <span id="chroma-meta">pitch</span>
+              </div>
+              <div id="plot-chroma" class="plot"></div>
+            </div>
+            <div class="plot-card">
+              <div class="plot-head">
+                <h3>Bandas</h3>
+                <span id="bands-meta">mix</span>
+              </div>
+              <div id="plot-bands" class="plot"></div>
+            </div>
+            <div class="plot-card">
+              <div class="plot-head">
+                <h3>Ritmo</h3>
+                <span id="rhythm-meta">onsets</span>
+              </div>
+              <div id="plot-rhythm" class="plot"></div>
+            </div>
+          </div>
+
+          <div class="music-grid">
+            <div class="music-block">
+              <h4>Armonía</h4>
+              <div class="key-hero" id="key-hero">—</div>
+              <p class="block-label">Escala</p>
+              <div class="scale-row" id="scale-row"></div>
+              <p class="block-label">Parciales</p>
+              <div class="peaks-row" id="peaks-row"></div>
+              <div class="mix-stats" id="mix-stats"></div>
+            </div>
+            <div class="music-block music-explain">
+              <h4>Explicación musical</h4>
+              <ul id="explain-list" class="explain-list"></ul>
+            </div>
+          </div>
+
+          <p class="block-label strip-label">Forma</p>
+          <div class="form-strip" id="form-strip"></div>
+          <p class="block-label strip-label">Capas</p>
+          <div class="layers-row" id="layers-row"></div>
+
+          <details class="raw-wrap">
+            <summary>ADN crudo</summary>
+            <pre id="output" class="output"></pre>
+          </details>
+        </div>
+
+        <div class="lab-busy" id="lab-busy" hidden>
+          <div class="lab-busy-inner">
+            <span class="busy-pulse"></span>
+            <p id="busy-text">Analizando…</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/app.js" type="module"></script>
+  </body>
+</html>

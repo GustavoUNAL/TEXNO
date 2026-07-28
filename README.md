@@ -144,11 +144,17 @@ El script instala Nginx + Certbot, obtiene el certificado Let's Encrypt y public
 
 Config manual: [`deploy/nginx/texno.site.conf`](deploy/nginx/texno.site.conf)
 
-Si Certbot falla con **500** en el challenge:
+Si Certbot falla con **500** y menciona otra IP (ej. `2.57.91.91`):
 
-1. En Cloudflare (si lo usas): pon el registro en **DNS only** (gris), no proxy (naranja).
-2. Diagnóstico: `sudo bash deploy/diagnose-texno-nginx.sh`
-3. Vuelve a correr el script de setup (ahora prueba el challenge antes de Certbot).
+**El DNS de texno.site apunta a más de un servidor.** Let's Encrypt valida desde varias redes; tu VPS responde bien pero la otra IP devuelve 500.
+
+1. En tu registrador DNS, deja **solo un registro A** para `@` y `www` → IP del VPS (`curl -4 ifconfig.me`)
+2. Elimina cualquier A antiguo (ej. `2.57.91.91`)
+3. Si usas Cloudflare: DNS only (gris), sin proxy
+4. Verifica: `dig texno.site A +short` debe mostrar **una sola IP**
+5. Espera 5–15 min y vuelve a correr el setup
+
+Diagnóstico: `sudo bash deploy/diagnose-texno-nginx.sh`
 
 ```bash
 cd ~/projects/TEXNO

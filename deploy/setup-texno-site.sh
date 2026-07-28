@@ -28,11 +28,24 @@ apt-get update -qq
 apt-get install -y nginx certbot python3-certbot-nginx curl
 
 echo "==> Comprobando DNS de ${DOMAIN}..."
-RESOLVED_IP="$(getent ahosts "$DOMAIN" | awk '/STREAM/ {print $1; exit}')"
+RESOLVED_IPS="$(dig +short "$DOMAIN" A | sort -u | tr '\n' ' ')"
+WWW_IPS="$(dig +short "$WWW" A | sort -u | tr '\n' ' ')"
 SERVER_IP="$(curl -4 -s ifconfig.me || curl -4 -s icanhazip.com || true)"
-echo "    ${DOMAIN} → ${RESOLVED_IP:-?}   |   VPS → ${SERVER_IP:-?}"
+echo "    ${DOMAIN} A: ${RESOLVED_IPS:-?}"
+echo "    ${WWW} A: ${WWW_IPS:-?}"
+echo "    VPS IPv4: ${SERVER_IP:-?}"
 
-if [[ -n "$RESOLVED_IP" && -n "$SERVER_IP" && "$RESOLVED_IP" != "$SERVER_IP" ]]; then
+IP_COUNT="$(dig +short "$DOMAIN" A | sort -u | wc -l | tr -d ' ')"
+if [[ "${IP_COUNT:-0}" -gt 1 ]]; then
+  echo ""
+  echo "ERROR: ${DOMAIN} tiene ${IP_COUNT} registros A distintos."
+  echo "       Let's Encrypt valida desde varias redes; si una IP apunta a otro servidor, falla el SSL."
+  echo "       Deja SOLO esta IP en tu DNS: ${SERVER_IP}"
+  echo "       IPs actuales: $(dig +short "$DOMAIN" A | sort -u | paste -sd ', ' -)"
+  exit 1
+fi
+
+if [[ -n "$RESOLVED_IPS" && -n "$SERVER_IP" && "$RESOLVED_IPS" != *"$SERVER_IP"* ]]; then
   echo "AVISO: el DNS no apunta a este servidor."
   read -r -p "¿Continuar? [y/N] " OK
   [[ "${OK:-}" =~ ^[yY]$ ]] || exit 1

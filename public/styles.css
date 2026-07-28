@@ -934,6 +934,16 @@ select {
   color: var(--ink);
 }
 
+.foot-mail {
+  color: var(--muted);
+  text-decoration: none;
+  font-size: 0.75rem;
+}
+
+.foot-mail:hover {
+  color: var(--ink);
+}
+
 @keyframes rise {
   from {
     opacity: 0;

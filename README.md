@@ -56,3 +56,7 @@ npm run analyze -- ./track.mp3 --format yaml --out dna.yaml
 `POST /api/analyze` — `multipart/form-data` con campo `audio`.
 
 Respuesta: JSON con forma, tempo, espectro, dinámica, capas estimadas y schema completo.
+
+---
+
+📧 gustavoarteaga0508@gmail.com

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>TEXNO — Open Source</title>
+    <meta
+      name="description"
+      content="TEXNO es un proyecto open source colaborativo para analizar composiciones musicales y extraer su ADN estructural."
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Syne:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="noise" aria-hidden="true"></div>
+
+    <header class="top">
+      <a class="logo" href="/">TEXNO</a>
+      <nav>
+        <a href="/">Inicio</a>
+        <a href="/#analizar">Analizar</a>
+        <a href="/opensource.html" aria-current="page">Open Source</a>
+      </nav>
+    </header>
+
+    <main class="oss-main">
+      <section class="oss-hero panel">
+        <p class="oss-kicker">Proyecto colaborativo</p>
+        <h1>Open Source</h1>
+        <p class="section-lede oss-lede">
+          TEXNO descompone una canción en datos estructurados — tempo, espectro,
+          armonía, forma y capas — y los muestra en un laboratorio visual.
+          Es software libre: puedes usarlo, estudiarlo, mejorarlo y compartirlo.
+        </p>
+        <div class="cta-row">
+          <a
+            class="btn primary"
+            href="https://github.com/GustavoUNAL/TEXNO"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Ver en GitHub
+          </a>
+          <a class="btn ghost" href="https://github.com/GustavoUNAL/TEXNO/fork" target="_blank" rel="noopener noreferrer">
+            Fork del repo
+          </a>
+        </div>
+        <div class="repo-box">
+          <span class="repo-label">Repositorio</span>
+          <code class="repo-url">https://github.com/GustavoUNAL/TEXNO.git</code>
+          <button type="button" class="btn ghost repo-copy" id="copy-repo">Copiar URL</button>
+        </div>
+      </section>
+
+      <section class="panel oss-section">
+        <h2>Qué es TEXNO</h2>
+        <p class="section-lede">
+          Motor de análisis musical orientado a productores, DJs e investigadores
+          que necesitan entender la arquitectura de un track sin abrir un DAW.
+        </p>
+        <div class="oss-grid">
+          <article class="oss-card">
+            <h3>ADN estructurado</h3>
+            <p>
+              Cada análisis genera un JSON/YAML con forma, BPM, espectro completo,
+              tonalidad estimada, dinámica, ritmo y capas heurísticas.
+            </p>
+          </article>
+          <article class="oss-card">
+            <h3>Lab visual</h3>
+            <p>
+              Gráficas interactivas con Plotly: espectro log, energía, cromagrama,
+              bandas, onsets y explicación musical en español.
+            </p>
+          </article>
+          <article class="oss-card">
+            <h3>API + CLI</h3>
+            <p>
+              Sube audio desde la web, llama <code>POST /api/analyze</code> o usa
+              <code>npm run analyze</code> en terminal para pipelines propios.
+            </p>
+          </article>
+        </div>
+      </section>
+
+      <section class="panel oss-section">
+        <h2>Stack</h2>
+        <ul class="oss-tags">
+          <li>Node.js 18+</li>
+          <li>Express</li>
+          <li>DSP heurístico</li>
+          <li>Plotly</li>
+          <li>PM2</li>
+          <li>ES Modules</li>
+        </ul>
+      </section>
+
+      <section class="panel oss-section">
+        <h2>Cómo colaborar</h2>
+        <ol class="oss-steps">
+          <li>
+            <strong>Clona el repo</strong>
+            <pre><code>git clone https://github.com/GustavoUNAL/TEXNO.git
+cd TEXNO
+npm install
+npm run dev</code></pre>
+          </li>
+          <li>
+            <strong>Crea una rama</strong> para tu feature o fix
+            <pre><code>git checkout -b feat/mi-mejora</code></pre>
+          </li>
+          <li>
+            <strong>Contribuye</strong> — mejoras al analizador, UI, docs, tests o
+            nuevas visualizaciones son bienvenidas
+          </li>
+          <li>
+            <strong>Abre un Pull Request</strong> en
+            <a href="https://github.com/GustavoUNAL/TEXNO/pulls" target="_blank" rel="noopener noreferrer">GitHub</a>
+            con descripción clara del cambio
+          </li>
+        </ol>
+      </section>
+
+      <section class="panel oss-section">
+        <h2>Áreas abiertas</h2>
+        <ul class="dna-list oss-areas">
+          <li><strong>ML / stems</strong> — separación de pistas con modelos</li>
+          <li><strong>Armonía</strong> — detección de acordes y progresiones</li>
+          <li><strong>Forma</strong> — segmentación más precisa por secciones</li>
+          <li><strong>UI</strong> — más gráficas, temas, accesibilidad</li>
+          <li><strong>Docs</strong> — guías, ejemplos y schema del ADN</li>
+        </ul>
+      </section>
+
+      <section class="panel oss-section oss-contact">
+        <h2>Contacto</h2>
+        <p>
+          Dudas, ideas o propuestas de colaboración:
+          <a href="mailto:gustavoarteaga0508@gmail.com">gustavoarteaga0508@gmail.com</a>
+        </p>
+      </section>
+    </main>
+
+    <footer class="foot">
+      <span>TEXNO · open source</span>
+      <a class="foot-mail" href="mailto:gustavoarteaga0508@gmail.com">📧 gustavoarteaga0508@gmail.com</a>
+    </footer>
+
+    <script>
+      document.getElementById('copy-repo')?.addEventListener('click', async () => {
+        const url = 'https://github.com/GustavoUNAL/TEXNO.git';
+        await navigator.clipboard.writeText(url);
+        const btn = document.getElementById('copy-repo');
+        btn.textContent = 'Copiado';
+        setTimeout(() => { btn.textContent = 'Copiar URL'; }, 1800);
+      });
+    </script>
+  </body>
+</html>

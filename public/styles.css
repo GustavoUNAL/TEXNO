@@ -995,3 +995,184 @@ select {
     transition: none !important;
   }
 }
+
+/* ── Open Source page ─────────────────────────────── */
+
+.oss-main {
+  max-width: 1120px;
+  margin: 0 auto;
+}
+
+.oss-hero {
+  padding-top: 2.5rem;
+}
+
+.oss-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.oss-hero h1 {
+  font-family: var(--display);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0 0 0.75rem;
+}
+
+.oss-lede {
+  max-width: 52ch;
+}
+
+.repo-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  align-items: center;
+  margin-top: 1.75rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--ink);
+  background: rgba(198, 255, 26, 0.12);
+}
+
+.repo-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+  width: 100%;
+}
+
+.repo-url {
+  flex: 1;
+  min-width: 0;
+  font-size: 0.78rem;
+  word-break: break-all;
+  color: var(--ink);
+}
+
+.repo-copy {
+  flex-shrink: 0;
+}
+
+.oss-section {
+  padding-top: 3rem;
+}
+
+.oss-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .oss-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.oss-card {
+  padding: 1.15rem 1.2rem;
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.oss-card h3 {
+  margin: 0 0 0.5rem;
+  font-family: var(--display);
+  font-size: 1.05rem;
+}
+
+.oss-card p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.85rem;
+  line-height: 1.55;
+}
+
+.oss-card code {
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
+.oss-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.oss-tags li {
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--line);
+  font-size: 0.78rem;
+  background: var(--surface);
+}
+
+.oss-steps {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1.5rem;
+  counter-reset: step;
+}
+
+.oss-steps li {
+  counter-increment: step;
+  padding-left: 2.5rem;
+  position: relative;
+}
+
+.oss-steps li::before {
+  content: counter(step);
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: grid;
+  place-items: center;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 0.85rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.oss-steps strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-family: var(--display);
+}
+
+.oss-steps pre {
+  margin: 0.5rem 0 0;
+  padding: 0.85rem 1rem;
+  background: #12151a;
+  color: #d7dde6;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  overflow-x: auto;
+}
+
+.oss-steps a {
+  color: var(--ink);
+}
+
+.oss-areas {
+  border-top: none;
+}
+
+.oss-contact a {
+  color: var(--ink);
+}
+
+.oss-contact a:hover {
+  text-decoration: underline;
+}

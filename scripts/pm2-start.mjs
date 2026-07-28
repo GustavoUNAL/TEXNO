@@ -6,7 +6,7 @@ import { dirname, join } from 'node:path';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
 const APP = 'texno';
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3847;
 
 function pm2Apps() {
   try {

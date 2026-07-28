@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const htmlPath = join(root, 'public', 'docs', 'texno-whitepaper.html');
 const pdfPath = join(root, 'public', 'docs', 'texno-whitepaper.pdf');
-const base = process.env.TEXNO_URL || 'http://localhost:3000';
+const base = process.env.TEXNO_URL || 'http://localhost:3847';
 
 await mkdir(join(root, 'public', 'docs'), { recursive: true });
 

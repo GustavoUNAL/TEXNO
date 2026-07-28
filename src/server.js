@@ -6,7 +6,7 @@ import { analyzeTrack, toYaml } from './analyzer/index.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = join(__dirname, '..');
-const PORT = Number(process.env.PORT) || 3000;
+const PORT = Number(process.env.PORT) || 3847;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const upload = multer({

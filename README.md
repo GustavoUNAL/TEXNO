@@ -100,11 +100,11 @@ npm install
 npm run dev
 ```
 
-Abre **http://localhost:3000** → sube un audio → el laboratorio se abre en popup con gráficas Plotly.
+Abre **http://localhost:3847** → sube un audio → el laboratorio se abre en popup con gráficas Plotly.
 
 ### Producción
 
-En servidor (VPS), usa **solo PM2** — no mezcles `node src/server.js` con PM2 o verás `EADDRINUSE` en el puerto 3000.
+En servidor (VPS), usa **solo PM2** — no mezcles `node src/server.js` con PM2 o verás `EADDRINUSE` en el puerto 3847.
 
 ```bash
 npm install -g pm2
@@ -118,11 +118,11 @@ Actualizar en el VPS después de un `git pull`:
 npm run vps:update
 ```
 
-Si el puerto 3000 está ocupado:
+Si el puerto 3847 está ocupado:
 
 ```bash
 pm2 list
-sudo ss -tlnp | grep :3000
+sudo ss -tlnp | grep :3847
 npm run pm2:restart
 ```
 
@@ -151,7 +151,7 @@ audio: <archivo>
 **Respuesta:** JSON con forma, tempo, espectro, armonía, dinámica, capas y schema completo.
 
 ```bash
-curl -F "audio=@track.mp3" http://localhost:3000/api/analyze
+curl -F "audio=@track.mp3" http://localhost:3847/api/analyze
 ```
 
 **Health check:** `GET /api/health`

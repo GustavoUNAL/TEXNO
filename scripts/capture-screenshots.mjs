@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const out = join(root, 'docs', 'screenshots');
-const base = process.env.TEXNO_URL || 'http://localhost:3000';
+const base = process.env.TEXNO_URL || 'http://localhost:3847';
 const sample = join(root, 'data', 'galeras elektro 2026.mp3');
 
 await mkdir(out, { recursive: true });

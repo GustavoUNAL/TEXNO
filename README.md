@@ -218,5 +218,8 @@ MIT — ver [LICENSE](LICENSE).
 
 <p align="center">
   <sub>Hecho para productores, DJs e investigadores de audio.</sub><br /><br />
-  📧 <a href="mailto:gustavoarteaga0508@gmail.com">gustavoarteaga0508@gmail.com</a>
+  <a href="https://github.com/GustavoUNAL/TEXNO" title="GitHub" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #12151a;text-decoration:none;margin-right:12px;">
+    <img src="https://cdn.simpleicons.org/github/12151a" alt="GitHub" width="26" height="26" />
+  </a>
+  <a href="mailto:gustavoarteaga0508@gmail.com" title="Correo" style="display:inline-flex;align-items:center;justify-content:center;width:44px;height:44px;border:1px solid #12151a;text-decoration:none;font-size:26px;">📧</a>
 </p>

@@ -930,18 +930,49 @@ select {
   border-top: 1px solid var(--line);
 }
 
+.foot-social {
+  justify-content: center;
+  padding: 2.25rem 1.5rem 3rem;
+}
+
 .foot code {
   color: var(--ink);
 }
 
-.foot-mail {
-  color: var(--muted);
-  text-decoration: none;
-  font-size: 0.75rem;
+.foot-links {
+  display: flex;
+  align-items: center;
+  gap: 1.35rem;
 }
 
-.foot-mail:hover {
+.foot-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
   color: var(--ink);
+  text-decoration: none;
+  border: 1px solid var(--line);
+  background: var(--surface);
+  transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.foot-icon:hover {
+  transform: translateY(-2px);
+  border-color: var(--ink);
+  background: rgba(198, 255, 26, 0.18);
+}
+
+.foot-icon svg {
+  width: 1.55rem;
+  height: 1.55rem;
+  fill: currentColor;
+}
+
+.foot-mail {
+  font-size: 1.65rem;
+  line-height: 1;
 }
 
 @keyframes rise {
@@ -1167,12 +1198,4 @@ select {
 
 .oss-areas {
   border-top: none;
-}
-
-.oss-contact a {
-  color: var(--ink);
-}
-
-.oss-contact a:hover {
-  text-decoration: underline;
 }

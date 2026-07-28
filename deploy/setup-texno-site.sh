@@ -51,12 +51,6 @@ if [[ -n "$STALE" ]]; then
   echo "    AVISO: caché DNS antigua en resolvers ($(echo "$STALE" | paste -sd ', ' -)); se continúa."
 fi
 
-if [[ -n "$RESOLVED_IPS" && -n "$SERVER_IP" && "$RESOLVED_IPS" != *"$SERVER_IP"* ]]; then
-  echo "AVISO: el DNS no apunta a este servidor."
-  read -r -p "¿Continuar? [y/N] " OK
-  [[ "${OK:-}" =~ ^[yY]$ ]] || exit 1
-fi
-
 echo "==> Buscando conflictos en Nginx..."
 if grep -Rsl "server_name.*${DOMAIN}" /etc/nginx/sites-enabled/ 2>/dev/null | grep -v "${DOMAIN}.conf"; then
   echo "AVISO: otro virtual host ya declara ${DOMAIN}."
